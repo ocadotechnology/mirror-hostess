@@ -1,0 +1,22 @@
+language: python
+python:
+- '3.5'
+sudo: required
+services:
+- docker
+env:
+  global:
+  - REGISTRY_USER=ocadotechnologygitlab
+  - VCS_SOURCE="https://github.com/${TRAVIS_REPO_SLUG}"
+  - secure: ""
+script:
+- python setup.py test
+- ./.travis/docker-build.sh
+after_script:
+- docker images
+deploy:
+  provider: script
+  script: ./.travis/docker-push.sh
+  on:
+    branch: master
+    tags: true

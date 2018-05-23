@@ -1,0 +1,24 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mirror-internal
+  namespace: default
+spec:
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mirror-hub
+  namespace: default
+spec:
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+  type: ClusterIP

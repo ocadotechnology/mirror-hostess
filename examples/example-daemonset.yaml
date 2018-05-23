@@ -1,0 +1,84 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    app: mirror-hostess
+  name: mirror-hostess
+spec:
+  template:
+    metadata:
+      labels:
+        app: mirror-hostess
+    spec:
+      terminationGracePeriodSeconds: 2
+      containers:
+        - name: mirror-internal
+          image: ocadotechnology/mirror-hostess:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "0.1"
+            limits:
+              memory: "128Mi"
+              cpu: "0.1"
+          env:
+            - name: LOCK_FILE
+              value: /var/lock/hostess/mirror-hostess
+            - name: SERVICE_NAME
+              value: "mirror-internal"
+            - name: SERVICE_NAMESPACE
+              value: "default"
+            - name: SHADOW_FQDN
+              value: "hub.docker.com"
+            - name: HOSTS_FILE
+              value: "/etc/hosts_from_host"
+            - name: HOSTS_FILE_BACKUP
+              value: "/etc/hosts.backup"
+          volumeMounts:
+            - name: etc-hosts
+              mountPath: /etc/hosts_from_host
+            - name: etc-hosts-backup
+              mountPath: /etc/hosts.backup
+            - name: lock
+              mountPath: /var/lock/hostess/
+        - name: mirror-hub
+          image: ocadotechnology/mirror-hostess:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "0.1"
+            limits:
+              memory: "128Mi"
+              cpu: "0.1"
+          env:
+            - name: LOCK_FILE
+              value: /var/lock/hostess/mirror-hostess
+            - name: SERVICE_NAME
+              value: "mirror-hub"
+            - name: SERVICE_NAMESPACE
+              value: "default"
+            - name: SHADOW_FQDN
+              value: "hub.docker.com"
+            - name: HOSTS_FILE
+              value: "/etc/hosts_from_host"
+            - name: HOSTS_FILE_BACKUP
+              value: "/etc/hosts.backup"
+          volumeMounts:
+            - name: etc-hosts
+              mountPath: /etc/hosts_from_host
+            - name: etc-hosts-backup
+              mountPath: /etc/hosts.backup
+            - name: lock
+              mountPath: /var/lock/hostess/
+      volumes:
+        - name: etc-hosts
+          hostPath:
+              path: /etc/hosts
+        - name: etc-hosts-backup
+          hostPath:
+              path: /etc/hosts.backup
+        - name: lock
+          hostPath:
+              path: /var/lock/mirror-hostess/
