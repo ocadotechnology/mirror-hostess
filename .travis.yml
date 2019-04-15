@@ -10,6 +10,7 @@ env:
   - VCS_SOURCE="https://github.com/${TRAVIS_REPO_SLUG}"
   - secure: "H94WgTmm9YwKSLRK3CKgcevf7yDsKKnABPC8scXx0rHRyWpoIllWUnll4eqv2dkblbD7opU5b3wtNVfcnZJqVHUsbRF/aKe8SspAPpCDNHI3cyQb1sZlkjdXNIz3UelMMH2OlE6CGlG4sNmtsF44EG75VQ07bs5r4vhLGmGD3qj08tO2r2PMZFQPngC+9gm2xlmF8XfhgJDhmrH9wuNBN83i3Q+rEdRO8CQGfZ+YL9JWRe7+7MRvh/aMzQb59QoqQqc6GbFtjmroW9qRvLs2cKEhLRWWioQs0+REcDlsSgNiAYQjKEbS9rCvXZXRp69v0RcDBv+Ixl5Xe7YPMhxEl9R6a1n8bh1CQ5FcTxckaUq5uSnUpEsWz9pEKgmz63ME2Iv++0FAXRP1rx8T8VzY24vZBd4vLg8VLMg/eCGZIxW484cxAYvs6abTI3Hhk71aEDrb7aDvUBBIrCtJgd3COAVckiYCCVinRPRixjli+asFTEDblbRth1H2Vlv4Ex1qdhL2TrlSO+z+iO5r7fn8D2f1J2fjc4ZZSHR+2Q04L6hiBauYvK/eec2eo7cj4D41Rvl7YfjY4WK0pwo5xweXWiAtEZBnPQ+GArif0rGcSryHFnfXUZJmwns9IOy4MfVS8M2OOf3K6aoKzcUXuxrTUNTzzbPaMpy37tmwNlFNAHg="
 script:
+- npm install -g snyk 
 - python setup.py test
 - ./.travis/docker-build.sh
 after_script:
