@@ -12,7 +12,7 @@ from python_hosts import Hosts, HostsEntry
 
 LOGGER = logging.getLogger(__name__)
 
-class Watcher(object): #pylint: disable=too-many-instance-attributes
+class Watcher: # pylint: disable=too-many-instance-attributes
     '''Watch kubernetes api for service objects
 
     :param env: dict of environment variables (eg: os.environ)
@@ -21,11 +21,9 @@ class Watcher(object): #pylint: disable=too-many-instance-attributes
 
     '''
 
-    def __init__(self, env=None, config=None):
+    def __init__(self, env=None):
         if env is None:
             env = {}
-        if config is None:
-            config = client.Configuration()
         LOGGER.info('Starting')
         lock_file_path = env.get('LOCK_FILE', '/var/lock/mirror-hostess')
         self.hosts_file_path = env.get('HOSTS_FILE', '/etc/hosts')
@@ -35,8 +33,7 @@ class Watcher(object): #pylint: disable=too-many-instance-attributes
         self.shadow_fqdn = env.get('SHADOW_FQDN', 'mirror-registry.example.com')
         self.hostfile = Hosts(self.hosts_file_path)
         self.lock = filelock.FileLock(lock_file_path)
-        api_client = client.ApiClient(config=config)
-        self.v1_api = client.CoreV1Api(api_client=api_client)
+        self.v1_api = client.CoreV1Api()
         self.hostmap = {}
         self.watch = watch.Watch()
 
@@ -79,15 +76,15 @@ class Watcher(object): #pylint: disable=too-many-instance-attributes
     def backup_etc_hosts(self):
         ''' simple file copy if destination does not already exist '''
         LOGGER.debug("Hosts file at %s, backup to %s",
-                  self.hosts_file_path, self.hosts_file_backup_path)
+                     self.hosts_file_path, self.hosts_file_backup_path)
         if os.path.exists(self.hosts_file_backup_path):
             LOGGER.warning("Backup hosts file already exists at %s",
-                        self.hosts_file_backup_path)
+                           self.hosts_file_backup_path)
         try:
             shutil.copyfile(self.hosts_file_path, self.hosts_file_backup_path)
         except IOError as err:
             LOGGER.critical("Unable to backup the hosts file to %s. [%s] Exiting for safety",
-                         self.hosts_file_backup_path, err)
+                            self.hosts_file_backup_path, err)
             raise RuntimeError("Exiting")
 
 
@@ -101,9 +98,10 @@ class Watcher(object): #pylint: disable=too-many-instance-attributes
     def watch_api(self): #pragma: no cover
         ''' watch service api endpoint, handle events '''
         try:
-            for event in self.watch.stream(self.v1_api.list_namespaced_service, namespace=self.service_namespace):
+            for event in self.watch.stream(self.v1_api.list_namespaced_service,
+                                           namespace=self.service_namespace):
                 self.handle_service_event(event)
-        except ApiException as e:
+        except ApiException:
             LOGGER.exception("Error watching custom object events", exc_info=True)
 
     def handle_service_event(self, event):
@@ -119,4 +117,4 @@ class Watcher(object): #pylint: disable=too-many-instance-attributes
                 LOGGER.warning("Unexpected event type %s", event['type'])
         else:
             LOGGER.debug("Ignoring event for %s in %s",
-                      service.metadata.name, service.metadata.namespace)
+                         service.metadata.name, service.metadata.namespace)

@@ -2,7 +2,7 @@
 import logging
 import unittest
 
-from kubernetes import client, watch
+from kubernetes import watch
 from .context import hostess
 
 
@@ -61,9 +61,8 @@ class ConfigTest(unittest.TestCase):
 
     def test_client_config(self):
         ''' test kubernetes client config is set '''
-        config = client.ConfigurationObject()
-        watcher = hostess.Watcher(config=config)
-        self.assertEqual(watcher.v1_api.api_client.config.host, 'https://localhost')
+        watcher = hostess.Watcher()
+        self.assertEqual(watcher.v1_api.api_client.configuration.host, 'http://localhost')
 
     def test_instance_host_map_exists(self):
         ''' test hostmap for the instance is initialised '''
