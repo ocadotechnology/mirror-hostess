@@ -7,9 +7,7 @@ import os
 import sys
 
 import hostess
-from kubernetes import config
-from kubernetes.config import ConfigException
-from kubernetes.client import configuration
+import kubernetes
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,18 +33,17 @@ def main():
         sys.exit(1)
 
     try:
-        config.load_kube_config()
-    except (FileNotFoundError, ConfigException) as err:
+        kubernetes.config.load_kube_config()
+    except (FileNotFoundError, kubernetes.config.ConfigException) as err:
         LOGGER.debug("Not able to use Kubeconfig: %s", err)
         try:
-            config.load_incluster_config()
-        except (FileNotFoundError, ConfigException) as err:
+            kubernetes.config.load_incluster_config()
+        except (FileNotFoundError, kubernetes.config.ConfigException) as err:
             LOGGER.error("Not able to use in-cluster config: %s", err)
             sys.exit(1)
-        
     try:
         while True:
-            hostess.Watcher(env=os.environ, config=configuration).execute()
+            hostess.Watcher(env=os.environ).execute()
             LOGGER.info("API closed connection, sleeping for %i seconds", sleep_time)
             time.sleep(sleep_time)
     except RuntimeError as err:
